@@ -1,5 +1,7 @@
+use std::io;
+
 fn main() {
-    compound();
+    invalid_array_element_access();
 }
 
 fn integer_test(){
@@ -54,4 +56,31 @@ fn operations(){
         //remainder
         let remainder = 43 % 5;
         println!("Remainder: {}", remainder);
+}
+
+fn arrayrust(){
+    let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    println!("{}", months[12]);
+}
+
+fn invalid_array_element_access(){
+    let a = [1, 2, 3, 4, 5];
+
+    println!("Please enter an array index.");
+
+    let mut index = String::new();
+
+    io::stdin()
+        .read_line(&mut index)
+        .expect("Failed to read line");
+
+    let index: usize = index
+        .trim()
+        .parse()
+        .expect("Index entered was not a number");
+
+    let element = a[index];
+
+    println!("The value of the element at index {} is: {}", index, element);
 }

@@ -73,3 +73,13 @@ Expressions implicitly return the unit value if they don't return any other valu
 
 ## The Array Type
 
+Unlike a tuple, every elementof an array **must have** the same type. Arrays in Rust are different from arrays in some other languages because arrays in Rust have a **fixed length**, like tuples.
+
+> Writing an array's type by using square brackets, and within the brackets include the type of each element, a semicolon, and then the number number of elements in the array, like so:
+
+    let a: [i32; 5] = [1, 2, 3, 4, 5];
+
+> Creating an array that contains the same value for each element.
+
+    let a = [3; 5]; // equals to let a = [3, 3, 3, 3, 3];
+
