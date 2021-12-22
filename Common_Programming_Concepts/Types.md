@@ -8,8 +8,8 @@
 |16-bit|i16|u16
 |32-bit|i32|u32
 |64-bit|i64|u64
-arch|isize|usize
 |128-bit|i128|u128|
+|arch|isize|usize|
 
 ### To explicity gandle the possibility of overflow
 
@@ -83,3 +83,28 @@ Unlike a tuple, every elementof an array **must have** the same type. Arrays in 
 
     let a = [3; 5]; // equals to let a = [3, 3, 3, 3, 3];
 
+## The String Type
+
+This type manages data allocated on the heap and as such is able to store an amount of text that is unknown to us at compile time. You can create a String from a string literal using the from function, like so:
+
+
+    let s = String::from("hello");
+
+> Memory and Allocation
+
+In the case of a string literal, we know the contents at compile time, so the text is hardcoded directly into the final executable. This is why string literals are fast and efficient. But these properties only come from the string literal’s immutability. Unfortunately, we can’t put a blob of memory into the binary for each piece of text whose size is unknown at compile time and whose size might change while running the program.
+
+With the String type, in order to support a mutable, growable piece of text, we need to allocate an amount of memory on the heap, unknown at compile time, to hold the contents. This means:
+
++ The memory must be requested from the memory allocator at runtime.
++ We need a way of returning this memory to the allocator when we’re done with our String.
+
+If we do want to deeply copy the heap data of the String, not just the stack data, we can use a common method called clone.
+
+> So what types implement the Copy trait? You can check the documentation for the given type to be sure, but as a general rule, any group of simple scalar values can implement Copy, and nothing that requires allocation or is some form of resource can implement Copy. Here are some of the types that implement Copy:
+
++ All the integer types, such as u32.
++ The Boolean type, bool, with values true and false.
++ All the floating point types, such as f64.
++ The character type, char.
++ Tuples, if they only contain types that also implement Copy. For example, (i32, i32) implements Copy, but (i32, String) does not.
