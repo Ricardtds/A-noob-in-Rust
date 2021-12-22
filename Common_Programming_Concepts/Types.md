@@ -108,3 +108,49 @@ If we do want to deeply copy the heap data of the String, not just the stack dat
 + All the floating point types, such as f64.
 + The character type, char.
 + Tuples, if they only contain types that also implement Copy. For example, (i32, i32) implements Copy, but (i32, String) does not.
+
+## The  Slice Type
+
+Another data type that does not have ownership is the slice. Slices let you reference a contiguous sequence of elements in a collection rather than the whole collection.
+
+    fn first_word(s: &String) -> usize {
+        let bytes = s.as_bytes();
+
+        for (i, &item) in bytes.iter().enumerate() {
+            if item == b' ' {
+                return i;
+            }
+        }
+
+        s.len()
+    }
+
+Because we need to go through the String element by element and check whether a value is a space, we’ll convert our String to an array of bytes using the as_bytes method:
+
+> A String slice
+
+    fn main() {
+        let s = String::from("hello world");
+
+        let hello = &s[0..5];
+        let world = &s[6..11];
+    }
+> String Literals Are Slices
+
+Recall that we talked about string literals being stored inside the binary. Now that we know about slices, we can properly understand string literals:  
+
+    fn main() {
+        let s = "Hello, world!";
+    }
+
+> String slice as parameter
+
+Knowing that you can take slices of literals and String values leads us to one more improvement on first_word, and that’s its signature:
+
+    fn first_word(s: &String) -> &str {
+
+
+A more experienced Rustacean would write the signature shown below instead because it allows us to use the same function on both &String values and &str values.
+
+    fn first_word(s: &str) -> &str {
+
