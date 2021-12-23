@@ -162,3 +162,4 @@ A more experienced Rustacean would write the signature shown below instead becau
 
     fn first_word(s: &str) -> &str {
 
+## Type Self
