@@ -11,6 +11,14 @@
 |128-bit|i128|u128|
 |arch|isize|usize|
 
+|Number literals|Example|
+|-|-|
+|Decimal|98_222|
+|Hex|0xff|
+|Octal|0o77|
+|Binary|0b1111_0000|
+|Byte(u8 only)|b'A'|
+
 ### To explicity gandle the possibility of overflow
 
 > Wrap ain all modes with the "wrapping_*" methods, such as "wrapping_add"
