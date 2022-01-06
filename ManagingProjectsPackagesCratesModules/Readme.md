@@ -174,3 +174,189 @@ _Filename: src/lib.rs_
     }
 
 _Because we made the `Appetizer` enum public, we can use the `Soup` and `Salad` variants in `eat_at_restaurant`_
+
+## [Bringing Paths into Scope with the use Keyword](https://doc.rust-lang.org/book/ch07-04-bringing-paths-into-scope-with-the-use-keyword.html#bringing-paths-into-scope-with-the-use-keyword)
+
+It might seem like the paths we’ve written to call functions so far are inconveniently long and repetitive. For example, in Listing 7-7, whether we chose the absolute or relative path to the `add_to_waitlist` function, every time we wanted to call `add_to_waitlist` we had to specify `front_of_house` and `hosting` too. Fortunately, there’s a way to simplify this process. We can bring a path into a scope once and then call the items in that path as if they’re local items with the `use` keyword.
+
+    mod front_of_house {
+        pub mod hosting {
+            pub fn add_to_waitlist() {}
+        }
+    }
+
+    use crate::front_of_house::hosting;
+
+    pub fn eat_at_restaurant() {
+        hosting::add_to_waitlist();
+        hosting::add_to_waitlist();
+        hosting::add_to_waitlist();
+    }
+_Filename: src/lib.rs_
+
+> Using a relative path would be like:
+
+    mod front_of_house {
+        pub mod hosting {
+            pub fn add_to_waitlist() {}
+        }
+    }
+
+    use self::front_of_house::hosting;
+
+    pub fn eat_at_restaurant() {
+        hosting::add_to_waitlist();
+        hosting::add_to_waitlist();
+        hosting::add_to_waitlist();
+    }
+
+## [Creating Idiomatic use Paths](https://doc.rust-lang.org/book/ch07-04-bringing-paths-into-scope-with-the-use-keyword.html#creating-idiomatic-use-paths)
+
+You might have wondered why we specified use `crate::front_of_house::hosting` and then called `hosting::add_to_waitlist` in `eat_at_restaurant` rather than specifying the `use` path all the way out to the `add_to_waitlist` function to achieve the same result.
+
+    mod front_of_house {
+        pub mod hosting {
+            pub fn add_to_waitlist() {}
+        }
+    }
+
+    use crate::front_of_house::hosting::add_to_waitlist;
+
+    pub fn eat_at_restaurant() {
+        add_to_waitlist();
+        add_to_waitlist();
+        add_to_waitlist();
+    }
+_Filename: src/lib.rs_
+
+This is the idiomatic way to bring a function into scope with `use`.
+
+Bringing the function’s parent module into scope with `use` means we have to specify the parent module when calling the function. Specifying the parent module when calling the function makes it clear that the function isn’t locally defined while still minimizing repetition of the full path. 
+
+> On the other hand, when bringing in structs, enums, and other items with use, it’s idiomatic to specify the full path
+
+    use std::collections::HashMap;
+
+    fn main() {
+        let mut map = HashMap::new();
+        map.insert(1, 2);
+    }
+_Filename: src/main.rs_
+
+There’s no strong reason behind this idiom: it’s just the convention that has emerged, and folks have gotten used to reading and writing Rust code this way.
+
+>>The exception to this idiom is if we’re bringing two items with the same name into scope with use statements, because Rust doesn’t allow that.
+
+    use std::fmt;
+    use std::io;
+
+    fn function1() -> fmt::Result {
+        // --snip--
+    }
+
+    fn function2() -> io::Result<()> {
+        // --snip--
+    }
+_Filename: src/lib.rs_
+
+## [Providing New Names with the as Keyword](https://doc.rust-lang.org/book/ch07-04-bringing-paths-into-scope-with-the-use-keyword.html#providing-new-names-with-the-as-keyword)
+
+A solution to the problem above is to bring the type of the same name with a new local name. Add the `as` followed by local name.
+
+    use std::fmt::Result;
+    use std::io::Result as IoResult;
+
+    fn function1() -> Result {
+        // --snip--
+    }
+
+    fn function2() -> IoResult<()> {
+        // --snip--
+    }
+
+## [Re-exporting Names with pub use](https://doc.rust-lang.org/book/ch07-04-bringing-paths-into-scope-with-the-use-keyword.html#re-exporting-names-with-pub-use)
+
+When we bring a name into scope with the ``use`` keyword, the name available in the new scope is **private**. To enable the code that calls our code to refer to that name as if it had been defined in that code’s scope, we can combine `pub` and `use`. This technique is called **re-exporting** because we’re bringing an item into scope but also making that item **available for others** to bring into their scope.
+
+    mod front_of_house {
+        pub mod hosting {
+            pub fn add_to_waitlist() {}
+        }
+    }
+
+    pub use crate::front_of_house::hosting;
+
+    pub fn eat_at_restaurant() {
+        hosting::add_to_waitlist();
+        hosting::add_to_waitlist();
+        hosting::add_to_waitlist();
+    }
+_Filename: src/lib.rs_
+
+## [Using External Packages](https://doc.rust-lang.org/book/ch07-04-bringing-paths-into-scope-with-the-use-keyword.html#using-external-packages)
+
+Using the example of the Chapter 2...
+
+Adding `rand` as a dependency in **Cargo.toml** tells Cargo to download the `rand` package and any dependencies from [crates.io](https://crates.io) and make `rand` available to our project.
+
+    rand = "0.8.3"
+_Filename: Cargo.toml_
+
+## [Using Nested Paths to Clean Up Large use Lists](https://doc.rust-lang.org/book/ch07-04-bringing-paths-into-scope-with-the-use-keyword.html#using-nested-paths-to-clean-up-large-use-lists)
+
+    // --snip--
+    use std::cmp::Ordering;
+    use std::io;
+    // --snip--
+_Filename: src/main.rs_
+
+Can now become this:
+
+    // --snip--
+    use std::{cmp::Ordering, io};
+    // --snip--
+_Filename: src/main.rs_
+
+> We can use a nested path at any level in a path, which is useful when combining two `use` statements that share a subpath. For example, Listing 7-19 shows two `use` statements: one that brings `std::io` into scope and one that brings `std::io::Write` into scope.
+
+    use std::io::{self, Write};
+_Filename: src/lib.rs_
+
+Note that this line brings std::io and std::io::Write into scope.
+
+## [The Glob Operator](https://doc.rust-lang.org/book/ch07-04-bringing-paths-into-scope-with-the-use-keyword.html#the-glob-operator)
+
+If we want to bring all public items defined in a path into scope, we can specify that path followed by `*`, the glob operator:
+
+    use std::collections::*;
+
+This `use` statement brings all public items defined in `std::collections` into the current scope. **Be careful** when using the glob operator! Glob can make it **harder to tell what names are in scope** and **where a name used in your program was defined**.
+
+> The glob operator is often used when testing to bring everything under test into the `tests` module
+
+# [Separating Modules into Different Files](https://doc.rust-lang.org/book/ch07-05-separating-modules-into-different-files.html#separating-modules-into-different-files)
+
+So far, all the examples in this chapter defined multiple modules in one file. When modules get large, you might want to move their definitions to a separate file to make the code easier to navigate.
+
+For example, let’s start from the code and move the front_of_house module to its own file src/front_of_house.rs by changing the crate root file so it contains the code. In this case, the crate root file is src/lib.rs, but this procedure also works with binary crates whose crate root file is src/main.rs.
+
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+_Filename: src/front_of_house.rs_
+
+Using a semicolon after mod `front_of_house rather` than using a block tells Rust to load the contents of the module from another file with the **same name as the module**. To continue with our example and extract the `hosting` module to its own file as well, we change src/front_of_house.rs to contain only the declaration of the `hosting` module:
+
+    pub mod hosting;
+_Filename: src/front_of_house.rs_
+
+Then we create a **src/front_of_house directory** and a **file src/front_of_house/hosting.rs** to contain the definitions made in the `hosting` module:
+
+    pub fn add_to_waitlist() {}
+_Filename: src/front_of_house/hosting.rs_
+
+ The `mod` keyword declares modules, and Rust **looks in a file with the same name as the module** for the code that goes into that module.
+
+# [Summary](https://doc.rust-lang.org/book/ch07-05-separating-modules-into-different-files.html#summary)
+
+Rust lets you split a package into multiple crates and a crate into modules so you can refer to items defined in one module from another module. You can do this by specifying absolute or relative paths. These paths can be brought into scope with a use statement so you can use a shorter path for multiple uses of the item in that scope. Module code is private by default, but you can make definitions public by adding the pub keyword.
